@@ -73,3 +73,8 @@ go build -ldflags "-s -w" -trimpath
 
 ![](image/2.png)
 ![](image/1.png)
+
+
+
+## proto   生成
+protoc --go_out=. --go-grpc_out=.  implant.proto

