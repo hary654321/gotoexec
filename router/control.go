@@ -4,7 +4,7 @@
  * @Autor: ABing
  * @Date: 2024-06-19 11:14:31
  * @LastEditors: lhl
- * @LastEditTime: 2024-06-19 12:29:43
+ * @LastEditTime: 2024-06-19 14:49:15
  */
 
 package router
@@ -28,7 +28,7 @@ func InitControlRouter(Router *gin.RouterGroup) {
 			cmd := new(grpcapi.Command)
 
 			cmd.In, _ = util.EncryptByAes([]byte(context.PostForm("cmd")))
-			cmdout, err := control.NewImplantcontrols.RunCommand(cmd)
+			cmdout, err := control.ControlInstance.RunCommand(cmd)
 
 			out, err := util.DecryptByAes(cmdout.Out)
 

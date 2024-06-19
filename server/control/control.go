@@ -4,7 +4,7 @@
  * @Autor: ABing
  * @Date: 2024-06-19 11:19:16
  * @LastEditors: lhl
- * @LastEditTime: 2024-06-19 11:54:23
+ * @LastEditTime: 2024-06-19 14:47:05
  */
 package control
 
@@ -23,7 +23,7 @@ type control struct {
 	work, output chan *grpcapi.Command
 }
 
-var NewImplantcontrols *control
+var ControlInstance *control
 
 func init() {
 	var (
@@ -40,7 +40,7 @@ func init() {
 	//植入程序服务端和管理程序服务端使用相同的通道
 	implantServer := implant.NewImplantServer(work, output)
 
-	NewImplantcontrols = NewImplantcontrol(work, output)
+	ControlInstance = Newcontrols(work, output)
 
 	//服务端建立监听，植入服务端与管理服务端监听的端口分别是4001和4002
 	if implantListener, err = net.Listen("tcp", fmt.Sprintf("0.0.0.0:%d", config.CoreConf.ListenPort)); err != nil {
@@ -61,7 +61,7 @@ func init() {
 	}()
 }
 
-func NewImplantcontrol(work, output chan *grpcapi.Command) *control {
+func Newcontrols(work, output chan *grpcapi.Command) *control {
 	s := new(control)
 	s.work = work
 	s.output = output
