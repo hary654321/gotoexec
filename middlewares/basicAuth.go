@@ -1,7 +1,15 @@
+/*
+ * @Description:
+ * @Version: 2.0
+ * @Autor: ABing
+ * @Date: 2024-06-19 11:14:31
+ * @LastEditors: lhl
+ * @LastEditTime: 2024-06-19 11:34:51
+ */
 package middlewares
 
 import (
-	"ias_tool_v2/config"
+	"gotoexec/config"
 	"net/http"
 
 	"github.com/gin-gonic/gin"
