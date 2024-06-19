@@ -4,12 +4,13 @@
  * @Autor: ABing
  * @Date: 2024-06-19 11:14:31
  * @LastEditors: lhl
- * @LastEditTime: 2024-06-19 17:58:02
+ * @LastEditTime: 2024-06-19 18:23:23
  */
 
 package router
 
 import (
+	"gotoexec/global"
 	"gotoexec/grpcapi"
 	"gotoexec/middlewares"
 	"gotoexec/server/control"
@@ -46,6 +47,15 @@ func InitControlRouter(Router *gin.RouterGroup) {
 			context.JSON(http.StatusOK, gin.H{
 				"code": http.StatusOK,
 				"data": string(out),
+				"msg":  "health",
+			})
+		})
+
+		p.GET("", func(context *gin.Context) {
+
+			context.JSON(http.StatusOK, gin.H{
+				"code": http.StatusOK,
+				"data": global.LoginQue,
 				"msg":  "health",
 			})
 		})

@@ -4,7 +4,7 @@
  * @Autor: ABing
  * @Date: 2024-06-19 11:19:16
  * @LastEditors: lhl
- * @LastEditTime: 2024-06-19 17:50:13
+ * @LastEditTime: 2024-06-19 18:01:12
  */
 package control
 
@@ -69,7 +69,6 @@ func Newcontrols(work, output chan *grpcapi.Command) *control {
 }
 
 func (s *control) RunCommand(cmd *grpcapi.Command) (*grpcapi.Command, error) {
-	log.Println("来命令了", cmd.Ip, cmd.In)
 	var res *grpcapi.Command
 	go func() {
 		s.work <- cmd

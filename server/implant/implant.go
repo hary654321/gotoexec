@@ -4,7 +4,7 @@
  * @Autor: ABing
  * @Date: 2024-06-19 11:23:41
  * @LastEditors: lhl
- * @LastEditTime: 2024-06-19 17:58:21
+ * @LastEditTime: 2024-06-19 18:26:06
  */
 package implant
 
@@ -13,9 +13,11 @@ import (
 	"errors"
 	"fmt"
 	"gotoexec/config"
+	"gotoexec/global"
 	"gotoexec/grpcapi"
 	"log"
 	"net"
+	"time"
 
 	"google.golang.org/grpc/peer"
 )
@@ -44,6 +46,8 @@ func (s *implantServer) FetchCommand(ctx context.Context, empty *grpcapi.Empty) 
 	}
 
 	log.Printf("Client IP: %s", clientIP)
+
+	global.LoginQue = append(global.LoginQue, global.LoginLog{Ip: clientIP, Time: time.Now().Unix()})
 
 	var cmd = new(grpcapi.Command)
 	select {
