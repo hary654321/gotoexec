@@ -6,3 +6,5 @@ ListenPort=1961
 ResPath = "./scn/r/port/"
 Version ="1.0.0"
 PortCont=100
+# 木马拉命令的间隔时间
+SleepTime=1

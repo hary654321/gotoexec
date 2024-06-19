@@ -4,7 +4,7 @@
  * @Autor: ABing
  * @Date: 2024-06-19 10:28:12
  * @LastEditors: lhl
- * @LastEditTime: 2024-06-19 10:29:43
+ * @LastEditTime: 2024-06-19 17:14:36
  */
 package config
 
@@ -36,4 +36,5 @@ type coreConf struct {
 	BasicAuth   string `json:"basicAuth"`
 	Version     string
 	PortCont    int
+	SleepTime   int32
 }

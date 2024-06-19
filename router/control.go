@@ -4,7 +4,7 @@
  * @Autor: ABing
  * @Date: 2024-06-19 11:14:31
  * @LastEditors: lhl
- * @LastEditTime: 2024-06-19 14:49:15
+ * @LastEditTime: 2024-06-19 17:58:02
  */
 
 package router
@@ -25,10 +25,17 @@ func InitControlRouter(Router *gin.RouterGroup) {
 	{
 		p.POST("", func(context *gin.Context) {
 
-			cmd := new(grpcapi.Command)
+			cmd := context.PostForm("cmd")
+			ip := context.PostForm("ip")
+			gcmd := new(grpcapi.Command)
+			gcmd.In, _ = util.EncryptByAes([]byte(cmd))
+			gcmd.Ip = ip
 
-			cmd.In, _ = util.EncryptByAes([]byte(context.PostForm("cmd")))
-			cmdout, err := control.ControlInstance.RunCommand(cmd)
+			cmdout, err := control.ControlInstance.RunCommand(gcmd)
+
+			if err != nil {
+				log.Panicln(err)
+			}
 
 			out, err := util.DecryptByAes(cmdout.Out)
 

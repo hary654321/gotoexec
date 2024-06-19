@@ -25,7 +25,7 @@ type Command struct {
 	state         protoimpl.MessageState
 	sizeCache     protoimpl.SizeCache
 	unknownFields protoimpl.UnknownFields
-
+	Ip string
 	In  string `protobuf:"bytes,1,opt,name=In,proto3" json:"In,omitempty"`
 	Out string `protobuf:"bytes,2,opt,name=Out,proto3" json:"Out,omitempty"`
 }
