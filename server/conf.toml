@@ -1,0 +1,8 @@
+# 认证密钥
+BasicAuth = "Basic enc6Y2g="
+HttpsServer = true
+ApiPort = 61666
+ListenPort=1961
+ResPath = "./scn/r/port/"
+Version ="1.0.0"
+PortCont=100

