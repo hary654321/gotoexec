@@ -4,12 +4,13 @@
  * @Autor: ABing
  * @Date: 2024-06-13 10:25:11
  * @LastEditors: lhl
- * @LastEditTime: 2024-06-20 17:10:28
+ * @LastEditTime: 2024-06-20 18:19:11
  */
 package util
 
 import (
 	"bytes"
+	"fmt"
 	"image"
 	"image/png"
 
@@ -21,7 +22,7 @@ func Screenshot() []*image.RGBA {
 	//获取当前活动屏幕数量
 	i := screenshot.NumActiveDisplays()
 	if i == 0 {
-
+		//linux 服务器可能没有屏幕
 	}
 	for j := 0; j <= i-1; j++ {
 		image, _ := screenshot.CaptureDisplay(j)
@@ -31,8 +32,19 @@ func Screenshot() []*image.RGBA {
 }
 
 func ImageToByte(image *image.RGBA) []byte {
+
+	if image == nil {
+		return nil // Or handle the nil case as appropriate for your application
+	}
+
 	buf := new(bytes.Buffer)
-	png.Encode(buf, image)
-	b := buf.Bytes()
-	return b
+	err := png.Encode(buf, image)
+
+	if err != nil {
+		// Handle the error, e.g., log it
+		fmt.Printf("Error encoding PNG: %v\n", err)
+		return nil // Return nil or an appropriate error indicator
+	}
+
+	return buf.Bytes()
 }

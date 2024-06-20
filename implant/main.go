@@ -28,7 +28,7 @@ func main() {
 	for {
 		log.Println("开始上线")
 
-		if conn, err = grpc.Dial(fmt.Sprintf("192.168.56.132:%d", 1961), opts...); err != nil {
+		if conn, err = grpc.Dial(fmt.Sprintf("172.16.130.160:%d", 1961), opts...); err != nil {
 			log.Println("上线失败", err)
 			time.Sleep(10 * time.Second)
 			continue

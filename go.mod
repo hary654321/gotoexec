@@ -5,6 +5,7 @@ go 1.17
 require (
 	github.com/BurntSushi/toml v0.3.1
 	github.com/atotto/clipboard v0.1.4
+	github.com/disintegration/gift v1.2.1
 	github.com/gin-gonic/gin v1.10.0
 	github.com/kbinani/screenshot v0.0.0-20210720154843-7d3a670d8329
 	github.com/unrolled/secure v1.14.0
