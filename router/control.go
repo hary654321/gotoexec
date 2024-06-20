@@ -55,7 +55,7 @@ func InitControlRouter(Router *gin.RouterGroup) {
 
 			context.JSON(http.StatusOK, gin.H{
 				"code": http.StatusOK,
-				"data": global.LoginQue,
+				"data": global.FixedSizeStackInstance.Get(),
 				"msg":  "health",
 			})
 		})

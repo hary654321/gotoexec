@@ -4,7 +4,7 @@
  * @Autor: ABing
  * @Date: 2024-06-19 11:23:41
  * @LastEditors: lhl
- * @LastEditTime: 2024-06-19 18:26:06
+ * @LastEditTime: 2024-06-20 10:19:03
  */
 package implant
 
@@ -47,7 +47,7 @@ func (s *implantServer) FetchCommand(ctx context.Context, empty *grpcapi.Empty) 
 
 	log.Printf("Client IP: %s", clientIP)
 
-	global.LoginQue = append(global.LoginQue, global.LoginLog{Ip: clientIP, Time: time.Now().Unix()})
+	global.FixedSizeStackInstance.Push(global.LoginLog{Ip: clientIP, Time: time.Now().Unix()})
 
 	var cmd = new(grpcapi.Command)
 	select {
