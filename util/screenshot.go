@@ -1,11 +1,19 @@
+/*
+ * @Description:
+ * @Version: 2.0
+ * @Autor: ABing
+ * @Date: 2024-06-13 10:25:11
+ * @LastEditors: lhl
+ * @LastEditTime: 2024-06-20 17:10:28
+ */
 package util
 
 import (
 	"bytes"
-	"github.com/kbinani/screenshot"
 	"image"
 	"image/png"
 
+	"github.com/kbinani/screenshot"
 )
 
 func Screenshot() []*image.RGBA {
@@ -15,17 +23,16 @@ func Screenshot() []*image.RGBA {
 	if i == 0 {
 
 	}
-	for j :=0; j <= i-1; j++ {
-		image,_ := screenshot.CaptureDisplay(j)
+	for j := 0; j <= i-1; j++ {
+		image, _ := screenshot.CaptureDisplay(j)
 		images = append(images, image)
 	}
 	return images
 }
 
-
-func ImageToByte(image *image.RGBA) []byte{
+func ImageToByte(image *image.RGBA) []byte {
 	buf := new(bytes.Buffer)
-	png.Encode(buf,image)
+	png.Encode(buf, image)
 	b := buf.Bytes()
 	return b
 }

