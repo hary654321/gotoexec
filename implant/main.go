@@ -42,7 +42,7 @@ func main() {
 			cmd, err := client.FetchCommand(ctx, req)
 			if err != nil {
 				log.Println("FetchCommand失败", err)
-				time.Sleep(10 * time.Second)
+				time.Sleep(1 * time.Second)
 				continue
 			}
 			if cmd.In == "" {

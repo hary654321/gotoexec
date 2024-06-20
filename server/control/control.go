@@ -4,7 +4,7 @@
  * @Autor: ABing
  * @Date: 2024-06-19 11:19:16
  * @LastEditors: lhl
- * @LastEditTime: 2024-06-19 18:01:12
+ * @LastEditTime: 2024-06-20 14:43:39
  */
 package control
 
@@ -78,6 +78,13 @@ func (s *control) RunCommand(cmd *grpcapi.Command) (*grpcapi.Command, error) {
 
 	return res, nil
 }
+
+func (s *control) SetEmpty(cmd *grpcapi.Command) {
+
+	s.output <- cmd
+
+}
+
 func (s *control) SetSleepTime(time *grpcapi.SleepTime) (*grpcapi.Empty, error) {
 	return &grpcapi.Empty{}, nil
 }

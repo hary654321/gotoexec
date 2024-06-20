@@ -4,7 +4,7 @@
  * @Autor: ABing
  * @Date: 2024-06-19 11:14:31
  * @LastEditors: lhl
- * @LastEditTime: 2024-06-19 18:23:23
+ * @LastEditTime: 2024-06-20 15:23:15
  */
 
 package router
@@ -36,6 +36,16 @@ func InitControlRouter(Router *gin.RouterGroup) {
 
 			if err != nil {
 				log.Panicln(err)
+			}
+
+			log.Println(cmdout.Out)
+			if cmdout.Out == "off" {
+				context.JSON(http.StatusOK, gin.H{
+					"code": http.StatusBadRequest,
+					"data": "不在线",
+					"msg":  "health",
+				})
+				return
 			}
 
 			out, err := util.DecryptByAes(cmdout.Out)

