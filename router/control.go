@@ -4,7 +4,7 @@
  * @Autor: ABing
  * @Date: 2024-06-19 11:14:31
  * @LastEditors: lhl
- * @LastEditTime: 2024-08-05 11:14:33
+ * @LastEditTime: 2024-08-05 11:57:21
  */
 
 package router
@@ -41,12 +41,11 @@ func InitControlRouter(Router *gin.RouterGroup) {
 				log.Panicln(err)
 			}
 
-			log.Println(cmdout.Out)
 			if cmdout.Out == "off" {
 				context.JSON(http.StatusOK, gin.H{
 					"code": http.StatusBadRequest,
 					"data": "不在线",
-					"msg":  "health",
+					"msg":  "off",
 				})
 				return
 			}
@@ -76,11 +75,14 @@ func InitControlRouter(Router *gin.RouterGroup) {
 				outstring = string(out)
 			}
 
+			log.Println("out:" + outstring)
 			context.JSON(http.StatusOK, gin.H{
 				"code": http.StatusOK,
 				"data": outstring,
-				"msg":  "health",
+				"msg":  "ok",
 			})
+
+			return
 		})
 
 		p.GET("", func(context *gin.Context) {
@@ -90,6 +92,8 @@ func InitControlRouter(Router *gin.RouterGroup) {
 				"data": global.FixedSizeStackInstance.Get(),
 				"msg":  "health",
 			})
+
+			return
 		})
 
 	}
