@@ -4,17 +4,19 @@
  * @Autor: ABing
  * @Date: 2024-06-19 11:19:16
  * @LastEditors: lhl
- * @LastEditTime: 2024-06-20 14:43:39
+ * @LastEditTime: 2024-08-05 15:12:10
  */
 package control
 
 import (
+	"context"
 	"fmt"
 	"gotoexec/config"
 	"gotoexec/grpcapi"
 	"gotoexec/server/implant"
 	"log"
 	"net"
+	"time"
 
 	"google.golang.org/grpc"
 )
@@ -25,13 +27,14 @@ type control struct {
 
 var ControlInstance *control
 
+var (
+	implantListener net.Listener
+	err             error
+	opts            []grpc.ServerOption
+	work, output    chan *grpcapi.Command
+)
+
 func init() {
-	var (
-		implantListener net.Listener
-		err             error
-		opts            []grpc.ServerOption
-		work, output    chan *grpcapi.Command
-	)
 
 	//加载配置
 	config.Init("conf.toml")
@@ -75,6 +78,29 @@ func (s *control) RunCommand(cmd *grpcapi.Command) (*grpcapi.Command, error) {
 	}()
 
 	res = <-s.output
+
+	return res, nil
+}
+
+func (s *control) RunCommandCtx(ctx context.Context, cmd *grpcapi.Command) (*grpcapi.Command, error) {
+	var res *grpcapi.Command
+
+	// 在goroutine中发送命令到工作队列
+	go func() {
+		s.work <- cmd
+	}()
+
+	// 设置超时时间
+	select {
+	case res = <-s.output:
+		// 成功从输出通道接收到结果
+	case <-ctx.Done():
+		// 上下文超时或取消
+		return nil, ctx.Err()
+	case <-time.After(8 * time.Second):
+		// 指定的超时时间，例如5秒
+		return nil, fmt.Errorf("command execution timed out")
+	}
 
 	return res, nil
 }

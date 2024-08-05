@@ -4,12 +4,13 @@
  * @Autor: ABing
  * @Date: 2024-06-19 11:14:31
  * @LastEditors: lhl
- * @LastEditTime: 2024-08-05 11:57:21
+ * @LastEditTime: 2024-08-05 15:08:45
  */
 
 package router
 
 import (
+	"context"
 	"encoding/base64"
 	"gotoexec/global"
 	"gotoexec/grpcapi"
@@ -19,6 +20,7 @@ import (
 	"log"
 	"net/http"
 	"strings"
+	"time"
 
 	"github.com/gin-gonic/gin"
 )
@@ -26,23 +28,30 @@ import (
 func InitControlRouter(Router *gin.RouterGroup) {
 	p := Router.Group("control").Use(middlewares.CostTime()).Use(middlewares.BasicAuth())
 	{
-		p.POST("", func(context *gin.Context) {
+		p.POST("", func(rctx *gin.Context) {
 
-			cmd := context.PostForm("cmd")
-			ip := context.PostForm("ip")
+			cmd := rctx.PostForm("cmd")
+			ip := rctx.PostForm("ip")
 			gcmd := new(grpcapi.Command)
 			gcmd.In, _ = util.EncryptByAes([]byte(cmd))
 			gcmd.Ip = ip
 
 			log.Println("gcmd", gcmd)
-			cmdout, err := control.ControlInstance.RunCommand(gcmd)
+
+			baseCtx := context.Background()
+
+			// 设置超时时间为5秒
+			ctx, cancel := context.WithTimeout(baseCtx, 8*time.Second)
+			defer cancel()
+
+			cmdout, err := control.ControlInstance.RunCommandCtx(ctx, gcmd)
 
 			if err != nil {
 				log.Panicln(err)
 			}
 
 			if cmdout.Out == "off" {
-				context.JSON(http.StatusOK, gin.H{
+				rctx.JSON(http.StatusOK, gin.H{
 					"code": http.StatusBadRequest,
 					"data": "不在线",
 					"msg":  "off",
@@ -76,7 +85,7 @@ func InitControlRouter(Router *gin.RouterGroup) {
 			}
 
 			log.Println("out:" + outstring)
-			context.JSON(http.StatusOK, gin.H{
+			rctx.JSON(http.StatusOK, gin.H{
 				"code": http.StatusOK,
 				"data": outstring,
 				"msg":  "ok",
