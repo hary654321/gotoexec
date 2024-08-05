@@ -4,7 +4,7 @@
  * @Autor: ABing
  * @Date: 2024-06-19 11:14:31
  * @LastEditors: lhl
- * @LastEditTime: 2024-06-20 16:12:25
+ * @LastEditTime: 2024-08-05 11:14:33
  */
 
 package router
@@ -34,6 +34,7 @@ func InitControlRouter(Router *gin.RouterGroup) {
 			gcmd.In, _ = util.EncryptByAes([]byte(cmd))
 			gcmd.Ip = ip
 
+			log.Println("gcmd", gcmd)
 			cmdout, err := control.ControlInstance.RunCommand(gcmd)
 
 			if err != nil {
